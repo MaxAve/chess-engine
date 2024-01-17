@@ -2,8 +2,8 @@
 #define TYPES_H
 
 #define BOARD_SIZE 64
-#define BOARD_ROW_LENGTH 8
-#define BOARD_COL_LENGTH 8
+#define BOARD_WIDTH 8
+#define BOARD_HEIGHT 8
 
 #define NUM_PIECES 12
 

@@ -10,6 +10,16 @@
 #include "types.h"
 #include "transposition.h"
 
+void DrawRectangle(sf::RenderWindow& window, float x, float y, float width, float height, const sf::Color& color) {
+    sf::Vertex vertices[] = {
+        sf::Vertex(sf::Vector2f(x, y), color),
+        sf::Vertex(sf::Vector2f(x + width, y), color),
+        sf::Vertex(sf::Vector2f(x + width, y + height), color),
+        sf::Vertex(sf::Vector2f(x, y + height), color)
+    };
+    window.draw(vertices, 4, sf::Quads);
+}
+
 void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboard &board)
 {
     for (int i = 0; i < NUM_PIECES; i++)
@@ -41,6 +51,9 @@ int main(int argc, char** argv)
     sf::Texture boardTexture;
     boardTexture.loadFromFile("assets/textures/chessboard.png");
 
+    sf::Texture whiteOutlineTexture;
+    whiteOutlineTexture.loadFromFile("assets/textures/white_outline.png");
+
     const int SQUARE_SIZE = 100;
     const int PIECE_SIZE = SQUARE_SIZE;
     const sf::Vector2i chessboardRenderOffset(100, 100);
@@ -59,10 +72,20 @@ int main(int argc, char** argv)
             GET_2D_Y(i) * SQUARE_SIZE + chessboardRenderOffset.y + (SQUARE_SIZE - PIECE_SIZE));
 	}
 
+    sf::Sprite squareOutline;
+    squareOutline.setTexture(whiteOutlineTexture);
+    squareOutline.setScale(
+        (float)PIECE_SIZE / (float)pieceTextures[PW].getSize().x, (float)PIECE_SIZE / (float)pieceTextures[PW].getSize().y);
+
     Bitboard mainBoard;
     InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
     TPosTable::InitZobristKeys();
     UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
+
+    sf::Vector2i cursorSquarePos(0, 0);
+    sf::Vector2i selectedSquare(0, 0);
+
+    uint64_t squareMarks = 0ULL;
 
     while (window.isOpen())
     {
@@ -74,8 +97,27 @@ int main(int argc, char** argv)
                 case sf::Event::Closed:
                     window.close();
                     break;
+                case sf::Event::MouseButtonPressed:
+                    if (cursorSquarePos == selectedSquare)
+                    {
+                        squareMarks = 0ULL;
+                    }
+                    else {
+                        squareMarks = 0ULL;
+                        sf::Vector2i oldSelectedSquare = selectedSquare;
+                        selectedSquare = cursorSquarePos;
+                        squareMarks |= (0x8000000000000000ULL >> GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH));
+                        squareMarks &= GetCombinedBitboard(&mainBoard);
+                    }
+                    break;
             }
         }
+
+        cursorSquarePos.x = (sf::Mouse::getPosition().x - window.getPosition().x) / SQUARE_SIZE - 1;
+        cursorSquarePos.y = (sf::Mouse::getPosition().y - window.getPosition().y - 30) / SQUARE_SIZE - 1;
+
+        squareOutline.setPosition(
+            cursorSquarePos.x * SQUARE_SIZE + chessboardRenderOffset.x, cursorSquarePos.y * SQUARE_SIZE + chessboardRenderOffset.y);
 
         window.clear(sf::Color::White);
 
@@ -83,6 +125,16 @@ int main(int argc, char** argv)
         for(int i = 0; i < 64; i++) {
             window.draw(chessPieceSprites[i]);
         }
+
+        for(int i = 0; i < 64; i++)
+        {
+            if (squareMarks & (1ULL << i))
+            {
+                DrawRectangle(window, (7 - GET_2D_X(i)) * SQUARE_SIZE + chessboardRenderOffset.x, (7 - GET_2D_Y(i)) * SQUARE_SIZE + chessboardRenderOffset.y, SQUARE_SIZE, SQUARE_SIZE, sf::Color(255, 0, 0, 127));
+            }
+        }
+
+        window.draw(squareOutline);
 
         window.display();
     }

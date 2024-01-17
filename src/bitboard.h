@@ -1,7 +1,7 @@
 #ifndef BITBOARD_H
 #define BITBOARD_H
 
-#include <iostream>
+#include <stdint.h>
 #include "types.h"
 
 #define BOARD_SETUP_EMPTY 0
@@ -15,5 +15,6 @@ typedef struct
 } Bitboard;
 
 void InitBitboard(Bitboard *bitboard, uint8_t boardType);
+uint64_t GetCombinedBitboard(Bitboard *bitboard);
 
 #endif
