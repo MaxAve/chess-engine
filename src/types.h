@@ -19,5 +19,6 @@
 #define RW 9
 #define QW 10
 #define KW 11
+#define NO_PIECE 12
 
 #endif

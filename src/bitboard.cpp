@@ -32,3 +32,11 @@ uint64_t GetCombinedBitboard(Bitboard *bitboard)
 {
     return bitboard->bitboards[0] | bitboard->bitboards[1] | bitboard->bitboards[2] | bitboard->bitboards[3] | bitboard->bitboards[4] | bitboard->bitboards[5] | bitboard->bitboards[6] | bitboard->bitboards[7] | bitboard->bitboards[8] | bitboard->bitboards[9] | bitboard->bitboards[10] | bitboard->bitboards[11];
 }
+
+uint8_t GetPieceType(Bitboard *bitboard, uint8_t bit)
+{
+    for(uint8_t i = 0; i < 12; ++i)
+        if(bitboard->bitboards[i] & (1ULL << bit))
+            return i;
+    return NO_PIECE;
+}

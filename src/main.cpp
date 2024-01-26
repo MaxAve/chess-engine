@@ -1,6 +1,12 @@
 /**
  * At the moment this file is the GUI
  * I might move GUI stuff to a different folder some time later
+ * 
+ * Just don't touch anything here. This is just black magic for all you need
+ * to know. Go focus on the engine itself.
+ * 
+ * All you need to know about this is that this is just a piece of code that
+ * interacts with the engine API to do stuff.
 */
 
 #include <iostream>
@@ -22,6 +28,12 @@ void DrawRectangle(sf::RenderWindow& window, float x, float y, float width, floa
 
 void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboard &board)
 {
+    for (int j = 0; j < 64; j++)
+    {
+        sf::Color c = sprites[j].getColor();
+        c.a = 0;
+        sprites[j].setColor(c);
+    }
     for (int i = 0; i < NUM_PIECES; i++)
     {
         for (int j = 0; j < 64; j++)
@@ -29,6 +41,9 @@ void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboa
             if (board.bitboards[i] & (0x8000000000000000ULL >> j))
             {
                 sprites[j].setTexture(textures[i]);
+                sf::Color c = sprites[j].getColor();
+                c.a = 255;
+                sprites[j].setColor(c);
             }
         }
     }
@@ -56,9 +71,9 @@ int main(int argc, char** argv)
 
     const int SQUARE_SIZE = 100;
     const int PIECE_SIZE = SQUARE_SIZE;
-    const sf::Vector2i chessboardRenderOffset(100, 100);
     sf::Sprite boardSprite;
     boardSprite.setTexture(boardTexture);
+    const sf::Vector2i chessboardRenderOffset(100, 100);
     boardSprite.setPosition(chessboardRenderOffset.x, chessboardRenderOffset.y);
     boardSprite.setScale(SQUARE_SIZE, SQUARE_SIZE);
 	sf::Sprite chessPieceSprites[64];
@@ -85,6 +100,9 @@ int main(int argc, char** argv)
     sf::Vector2i cursorSquarePos(0, 0);
     sf::Vector2i selectedSquare(0, 0);
 
+    sf::Vector2i selectedPiecePosition(-1, -1);
+    uint8_t selectedPiece = NO_PIECE;
+
     uint64_t squareMarks = 0ULL;
 
     while (window.isOpen())
@@ -98,16 +116,31 @@ int main(int argc, char** argv)
                     window.close();
                     break;
                 case sf::Event::MouseButtonPressed:
-                    if (cursorSquarePos == selectedSquare)
+                    squareMarks = 0ULL;
+                    selectedSquare = cursorSquarePos;
+                    // If the selected piece is not set, set it; else move the piece
+                    if (selectedPiecePosition.x < 0 || selectedPiecePosition.y < 0)
                     {
-                        squareMarks = 0ULL;
+                        // If there is a piece on this square, set the selected piece
+                        if (GetPieceType(&mainBoard, (63-GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH))) != NO_PIECE)
+                        {
+                            selectedPiecePosition = selectedSquare;
+                            selectedPiece = GetPieceType(&mainBoard, (63-GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH)));
+                        }
                     }
                     else {
-                        squareMarks = 0ULL;
-                        sf::Vector2i oldSelectedSquare = selectedSquare;
-                        selectedSquare = cursorSquarePos;
-                        squareMarks |= (0x8000000000000000ULL >> GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH));
-                        squareMarks &= GetCombinedBitboard(&mainBoard);
+                        // Remove all pieces at the target position
+                        for(uint8_t i = 0; i < 12; i++)
+                            mainBoard.bitboards[i] &= ~(1ULL << (63-GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH)));
+
+                        // Place piece at target square
+                        mainBoard.bitboards[selectedPiece] |= (1ULL << (63-GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH)));
+
+                        // Remove piece from old square
+                        mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
+
+                        UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
+                        selectedPiecePosition = sf::Vector2i(-1, -1);
                     }
                     break;
             }

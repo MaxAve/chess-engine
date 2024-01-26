@@ -16,5 +16,6 @@ typedef struct
 
 void InitBitboard(Bitboard *bitboard, uint8_t boardType);
 uint64_t GetCombinedBitboard(Bitboard *bitboard);
+uint8_t GetPieceType(Bitboard *bitboard, uint8_t bit);
 
 #endif
