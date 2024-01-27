@@ -10,12 +10,12 @@ void InitBitboard(Bitboard *bitboard, uint8_t boardType)
             break;
             
         case BOARD_SETUP_CLASSIC:
-            bitboard->bitboards[PB] = 0x00ff000000000000;
+            bitboard->bitboards[PB] = 0xff000000000000;
             bitboard->bitboards[NB] = 0x4200000000000000;
             bitboard->bitboards[BB] = 0x2400000000000000;
             bitboard->bitboards[RB] = 0x8100000000000000;
             bitboard->bitboards[QB] = 0x1000000000000000;
-            bitboard->bitboards[KB] = 0x0800000000000000;
+            bitboard->bitboards[KB] = 0x800000000000000;
             bitboard->bitboards[PW] = 0xff00ULL;
             bitboard->bitboards[NW] = 0x42ULL;
             bitboard->bitboards[BW] = 0x24ULL;
@@ -28,9 +28,19 @@ void InitBitboard(Bitboard *bitboard, uint8_t boardType)
     bitboard->flags = 0x1f;
 }
 
-uint64_t GetCombinedBitboard(Bitboard *bitboard)
+uint64_t GetCombinedBitboard(const Bitboard *bitboard)
 {
     return bitboard->bitboards[0] | bitboard->bitboards[1] | bitboard->bitboards[2] | bitboard->bitboards[3] | bitboard->bitboards[4] | bitboard->bitboards[5] | bitboard->bitboards[6] | bitboard->bitboards[7] | bitboard->bitboards[8] | bitboard->bitboards[9] | bitboard->bitboards[10] | bitboard->bitboards[11];
+}
+
+uint64_t GetCombinedBitboardWhite(const Bitboard *bitboard)
+{
+    return bitboard->bitboards[6] | bitboard->bitboards[7] | bitboard->bitboards[8] | bitboard->bitboards[9] | bitboard->bitboards[10] | bitboard->bitboards[11];
+}
+
+uint64_t GetCombinedBitboardBlack(const Bitboard *bitboard)
+{
+    return bitboard->bitboards[0] | bitboard->bitboards[1] | bitboard->bitboards[2] | bitboard->bitboards[3] | bitboard->bitboards[4] | bitboard->bitboards[5];
 }
 
 uint8_t GetPieceType(Bitboard *bitboard, uint8_t bit)
