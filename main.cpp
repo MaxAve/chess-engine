@@ -23,6 +23,17 @@
 #define DEBUG_TEXT_DATA_DEPTH 2
 #define DEBUG_TEXT_DATA_DEEP_EVAL 3
 
+sf::Font openSans;
+
+void InitText(sf::Text *text, int x, int y, std::string str)
+{
+    (*text).setFont(openSans);
+    (*text).setString(str);
+    (*text).setCharacterSize(20);
+    (*text).setFillColor(sf::Color::Black);
+    (*text).setPosition(x, y);
+}
+
 /* Draw rectangle using vertexes */
 void DrawRectangle(sf::RenderWindow& window, float x, float y, float width, float height, const sf::Color& color)
 {
@@ -62,6 +73,8 @@ void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboa
 int main(int argc, char** argv)
 {
     Bitboard mainBoard;
+    InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
+    TPosTable::InitZobristKeys();
 
     const int SCREEN_WIDTH = sf::VideoMode::getDesktopMode().width;
     const int SCREEN_HEIGHT = sf::VideoMode::getDesktopMode().height;
@@ -83,15 +96,7 @@ int main(int argc, char** argv)
     whiteOutlineTexture.loadFromFile("assets/textures/white_outline.png");
 
     /* Fonts */
-    sf::Font openSans;
     openSans.loadFromFile("assets/fonts/OpenSans-VariableFont_wdth,wght.ttf");
-
-    /* Text */
-    sf::Text debugText;
-    debugText.setFont(openSans);
-    debugText.setString("Hello World!");
-    debugText.setCharacterSize(20);
-    debugText.setFillColor(sf::Color::Black);
 
     /* Board sprite */
     const int SQUARE_SIZE = 100;
@@ -112,15 +117,18 @@ int main(int argc, char** argv)
             GET_2D_Y(i) * SQUARE_SIZE + chessboardRenderOffset.y + (SQUARE_SIZE - PIECE_SIZE));
 	}
 
+    /* Text */
+    sf::Text debug_zobristHash;
+    InitText(&debug_zobristHash, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y, "Hash: " + std::to_string(TPosTable::ZobristHash(mainBoard)));
+    sf::Text debug_flags;
+    InitText(&debug_flags, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 20, "Flags: " + BinaryToString(mainBoard.flags));
+
     /* Square cursor */
     sf::Sprite squareOutline;
     squareOutline.setTexture(whiteOutlineTexture);
     squareOutline.setScale(
         (float)PIECE_SIZE / (float)pieceTextures[PW].getSize().x, (float)PIECE_SIZE / (float)pieceTextures[PW].getSize().y);
 
-    /* Game data */
-    InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
-    TPosTable::InitZobristKeys();
     UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
 
     /* UI stuff */
@@ -156,8 +164,8 @@ int main(int argc, char** argv)
                         }
                     }
                     else {
-			if(selectedPiecePosition.x != selectedSquare.x || selectedPiecePosition.y != selectedSquare.y)
-			{
+                        if(selectedPiecePosition.x != selectedSquare.x || selectedPiecePosition.y != selectedSquare.y)
+                        {
                             // Remove all pieces at the target position
                             for(uint8_t i = 0; i < 12; i++)
                                 mainBoard.bitboards[i] &= ~(1ULL << bit);
@@ -169,7 +177,8 @@ int main(int argc, char** argv)
                             mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
 
                             UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
-			}
+                            debug_zobristHash.setString("Hash: " + std::to_string(TPosTable::ZobristHash(mainBoard)));
+			            }
                         selectedPiecePosition = sf::Vector2i(-1, -1);
                     }
                     break;
@@ -206,7 +215,8 @@ int main(int argc, char** argv)
                 sf::Color(255, 255, 0, 130));
         }
 
-        window.draw(debugText);
+        window.draw(debug_zobristHash);
+        window.draw(debug_flags);
 
         window.draw(squareOutline);
 

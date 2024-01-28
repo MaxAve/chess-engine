@@ -34,6 +34,20 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             if(((1ULL << bit) & 0xff000000000000ULL) && !(allPieces & (1ULL << (bit + DOWN))))
                 legalMoves |= ((1ULL << (bit + DOWN * 2)) & ~allPieces); 
             break;
+
+        /* White knight */
+        case NW:
+            legalMoves |= ((1ULL << (bit + LEFT*2  + UP    )) & ~(FILE | (FILE << 1) | RANK));
+            legalMoves |= ((1ULL << (bit + LEFT*2  + DOWN  )) & ~(FILE | (FILE << 1) | (RANK << 56)));
+            legalMoves |= ((1ULL << (bit + LEFT    + UP*2  )) & ~(FILE | RANK | (RANK << 7)));
+            legalMoves |= ((1ULL << (bit + LEFT    + DOWN*2)) & ~(FILE | (RANK << 48) | (RANK << 56)));
+            legalMoves |= ((1ULL << (bit + RIGHT   + DOWN*2)) & ~((FILE << 7) | (RANK << 48) | (RANK << 56)));
+            legalMoves |= ((1ULL << (bit + RIGHT   + UP*2  )) & ~((FILE << 7) | RANK | (RANK << 8)));
+            legalMoves |= ((1ULL << (bit + RIGHT*2 + UP    )) & ~((FILE << 6) | (FILE << 7) | RANK));
+            legalMoves |= ((1ULL << (bit + RIGHT*2 + DOWN  )) & ~((FILE << 6) | (FILE << 7) | (RANK << 56)));
+            legalMoves &= ~whitePieces;
+            // have fun with that
+            break;
     }
 
     return legalMoves;
