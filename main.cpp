@@ -144,7 +144,7 @@ int main(int argc, char** argv)
                     squareMarks = 0ULL;
                     selectedSquare = cursorSquarePos;
                     const uint8_t bit = (63-GET_1D_X(selectedSquare.x, selectedSquare.y, BOARD_WIDTH));
-                    // If the selected piece is not set, set it; else move the piece
+                    // If the selected piece is not set, set it; else move the piece unless the selected piece is clicked on again
                     if (selectedPiecePosition.x < 0 || selectedPiecePosition.y < 0)
                     {
                         // If there is a piece on this square, set the selected piece
@@ -156,17 +156,20 @@ int main(int argc, char** argv)
                         }
                     }
                     else {
-                        // Remove all pieces at the target position
-                        for(uint8_t i = 0; i < 12; i++)
-                            mainBoard.bitboards[i] &= ~(1ULL << bit);
+			if(selectedPiecePosition.x != selectedSquare.x || selectedPiecePosition.y != selectedSquare.y)
+			{
+                            // Remove all pieces at the target position
+                            for(uint8_t i = 0; i < 12; i++)
+                                mainBoard.bitboards[i] &= ~(1ULL << bit);
 
-                        // Place piece at target square
-                        mainBoard.bitboards[selectedPiece] |= (1ULL << bit);
+                            // Place piece at target square
+                            mainBoard.bitboards[selectedPiece] |= (1ULL << bit);
 
-                        // Remove piece from old square
-                        mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
+                            // Remove piece from old square
+                            mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
 
-                        UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
+                            UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
+			}
                         selectedPiecePosition = sf::Vector2i(-1, -1);
                     }
                     break;
