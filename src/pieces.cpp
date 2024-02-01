@@ -61,12 +61,94 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             legalMoves |= ((1ULL << (bit + RIGHT*2 + DOWN  )) & ~((FILE << 6) | (FILE << 7) | (RANK << 56)));
             legalMoves &= ~blackPieces;
             break;
+        
+        /* White bishop */
+        case BW:
+            if(bit % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_RIGHT*i));
+                    if((1ULL << (bit + UP_RIGHT*i)) & allPieces || (bit + UP_RIGHT*i) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_RIGHT*i));
+                    if((1ULL << (bit + DOWN_RIGHT*i)) & allPieces || (bit + DOWN_RIGHT*i) % 8 == 0 || (bit + DOWN_RIGHT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_LEFT*i));
+                    if((1ULL << (bit + DOWN_LEFT*i)) & allPieces || (bit + DOWN_LEFT*i + 1) % 8 == 0 || (bit + DOWN_LEFT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_LEFT*i));
+                    if((1ULL << (bit + UP_LEFT*i)) & allPieces || (bit + UP_LEFT*i + 1) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            legalMoves &= ~whitePieces;
+            break;
+
+        /* Black bishop */
+        case BB:
+            if(bit % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_RIGHT*i));
+                    if((1ULL << (bit + UP_RIGHT*i)) & allPieces || (bit + UP_RIGHT*i) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_RIGHT*i));
+                    if((1ULL << (bit + DOWN_RIGHT*i)) & allPieces || (bit + DOWN_RIGHT*i) % 8 == 0 || (bit + DOWN_RIGHT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_LEFT*i));
+                    if((1ULL << (bit + DOWN_LEFT*i)) & allPieces || (bit + DOWN_LEFT*i + 1) % 8 == 0 || (bit + DOWN_LEFT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_LEFT*i));
+                    if((1ULL << (bit + UP_LEFT*i)) & allPieces || (bit + UP_LEFT*i + 1) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            legalMoves &= ~blackPieces;
+            break;
 
         /* White rook */
         case RW:
             if(bit % 8 != 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + RIGHT*i));
                     if((1ULL << (bit + RIGHT*i)) & allPieces || (bit + RIGHT*i) % 8 == 0)
@@ -75,7 +157,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if((bit + 1) % 8 != 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + LEFT*i));
                     if((1ULL << (bit + LEFT*i)) & allPieces || (bit + LEFT*i + 1) % 8 == 0)
@@ -84,7 +166,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if(bit / 8 < 7)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + UP*i));
                     if((1ULL << (bit + UP*i)) & allPieces || (bit + UP*i) / 8 >= 7)
@@ -93,7 +175,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if(bit / 8 > 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + DOWN*i));
                     if((1ULL << (bit + DOWN*i)) & allPieces || (bit + DOWN*i) / 8 == 0)
@@ -107,7 +189,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
         case RB:
             if(bit % 8 != 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + RIGHT*i));
                     if((1ULL << (bit + RIGHT*i)) & allPieces || (bit + RIGHT*i) % 8 == 0)
@@ -116,7 +198,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if((bit + 1) % 8 != 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + LEFT*i));
                     if((1ULL << (bit + LEFT*i)) & allPieces || (bit + LEFT*i + 1) % 8 == 0)
@@ -125,7 +207,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if(bit / 8 < 7)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + UP*i));
                     if((1ULL << (bit + UP*i)) & allPieces || (bit + UP*i) / 8 >= 7)
@@ -134,7 +216,161 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit)
             }
             if(bit / 8 > 0)
             {
-                for(int i = 1; i < 8; i++)
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN*i));
+                    if((1ULL << (bit + DOWN*i)) & allPieces || (bit + DOWN*i) / 8 == 0)
+                        break;
+                }
+            }
+            legalMoves &= ~blackPieces;
+            break;
+
+        /* White queen */
+        case QW:
+            if(bit % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_RIGHT*i));
+                    if((1ULL << (bit + UP_RIGHT*i)) & allPieces || (bit + UP_RIGHT*i) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_RIGHT*i));
+                    if((1ULL << (bit + DOWN_RIGHT*i)) & allPieces || (bit + DOWN_RIGHT*i) % 8 == 0 || (bit + DOWN_RIGHT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_LEFT*i));
+                    if((1ULL << (bit + DOWN_LEFT*i)) & allPieces || (bit + DOWN_LEFT*i + 1) % 8 == 0 || (bit + DOWN_LEFT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_LEFT*i));
+                    if((1ULL << (bit + UP_LEFT*i)) & allPieces || (bit + UP_LEFT*i + 1) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + RIGHT*i));
+                    if((1ULL << (bit + RIGHT*i)) & allPieces || (bit + RIGHT*i) % 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + LEFT*i));
+                    if((1ULL << (bit + LEFT*i)) & allPieces || (bit + LEFT*i + 1) % 8 == 0)
+                        break;
+                }
+            }
+            if(bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP*i));
+                    if((1ULL << (bit + UP*i)) & allPieces || (bit + UP*i) / 8 >= 7)
+                        break;
+                }
+            }
+            if(bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN*i));
+                    if((1ULL << (bit + DOWN*i)) & allPieces || (bit + DOWN*i) / 8 == 0)
+                        break;
+                }
+            }
+            legalMoves &= ~whitePieces;
+            break;
+
+        /* Black queen */
+        case QB:
+            if(bit % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_RIGHT*i));
+                    if((1ULL << (bit + UP_RIGHT*i)) & allPieces || (bit + UP_RIGHT*i) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_RIGHT*i));
+                    if((1ULL << (bit + DOWN_RIGHT*i)) & allPieces || (bit + DOWN_RIGHT*i) % 8 == 0 || (bit + DOWN_RIGHT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + DOWN_LEFT*i));
+                    if((1ULL << (bit + DOWN_LEFT*i)) & allPieces || (bit + DOWN_LEFT*i + 1) % 8 == 0 || (bit + DOWN_LEFT*i) / 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0 && bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP_LEFT*i));
+                    if((1ULL << (bit + UP_LEFT*i)) & allPieces || (bit + UP_LEFT*i + 1) % 8 == 0 || (bit + UP_RIGHT*i) / 8 > 6)
+                        break;
+                }
+            }
+            if(bit % 8 != 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + RIGHT*i));
+                    if((1ULL << (bit + RIGHT*i)) & allPieces || (bit + RIGHT*i) % 8 == 0)
+                        break;
+                }
+            }
+            if((bit + 1) % 8 != 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + LEFT*i));
+                    if((1ULL << (bit + LEFT*i)) & allPieces || (bit + LEFT*i + 1) % 8 == 0)
+                        break;
+                }
+            }
+            if(bit / 8 < 7)
+            {
+                for(uint8_t i = 1; i < 8; i++)
+                {
+                    legalMoves |= (1ULL << (bit + UP*i));
+                    if((1ULL << (bit + UP*i)) & allPieces || (bit + UP*i) / 8 >= 7)
+                        break;
+                }
+            }
+            if(bit / 8 > 0)
+            {
+                for(uint8_t i = 1; i < 8; i++)
                 {
                     legalMoves |= (1ULL << (bit + DOWN*i));
                     if((1ULL << (bit + DOWN*i)) & allPieces || (bit + DOWN*i) / 8 == 0)
