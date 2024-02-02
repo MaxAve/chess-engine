@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include "bitboard.h"
 
+#define CAPTURES_ONLY 0b00000001
+#define IGNORE_KINGS 0b00000010
+
+uint64_t GetLegalPawnMoves(const Bitboard *bitboard, const uint64_t &opponentBitboard, const uint64_t &allPiecesBitboard);
+
 /**
  * Returns a bitboard (64-bit) where positive bits repsent squares the piece can move to
  * @param bitboard pointer to board representation
@@ -12,6 +17,10 @@
  * @returns 64-bit bitboard (uint64_t)
  * @warning Generates all legal moves from scratch; slow!
 */
-uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit);
+uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit, uint8_t flags=0);
+
+uint64_t GetLegalMovesWhite(const Bitboard *bitboard, uint8_t flags=0);
+
+uint64_t GetLegalMovesBlack(const Bitboard *bitboard, uint8_t flags=0);
 
 #endif

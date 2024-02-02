@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 {
     Bitboard mainBoard;
     InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
-    TPosTable::InitZobristKeys();
+    TranspositionTable::InitZobristKeys();
 
     const int SCREEN_WIDTH = sf::VideoMode::getDesktopMode().width;
     const int SCREEN_HEIGHT = sf::VideoMode::getDesktopMode().height;
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 
     /* Text */
     sf::Text debug_zobristHash;
-    InitText(&debug_zobristHash, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y, "Hash: " + std::to_string(TPosTable::ZobristHash(mainBoard)));
+    InitText(&debug_zobristHash, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y, "Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
     sf::Text debug_flags;
     InitText(&debug_flags, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 20, "Flags: " + BinaryToString(mainBoard.flags));
 
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
                             mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
 
                             UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
-                            debug_zobristHash.setString("Hash: " + std::to_string(TPosTable::ZobristHash(mainBoard)));
+                            debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
 			            }
                         selectedPiecePosition = sf::Vector2i(-1, -1);
                     }
