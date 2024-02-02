@@ -7,8 +7,6 @@
 #define CAPTURES_ONLY 0b00000001
 #define IGNORE_KINGS 0b00000010
 
-uint64_t GetLegalPawnMoves(const Bitboard *bitboard, const uint64_t &opponentBitboard, const uint64_t &allPiecesBitboard);
-
 /**
  * Returns a bitboard (64-bit) where positive bits repsent squares the piece can move to
  * @param bitboard pointer to board representation
