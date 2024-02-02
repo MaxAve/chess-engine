@@ -1,5 +1,7 @@
 #include "transposition.h"
 
+std::unordered_map<uint64_t, TranspositionTable::TranspositionEntry> TranspositionTable::table = {};
+
 uint64_t TranspositionTable::zobristKeys[BOARD_SIZE][NUM_PIECES + 1]; // NUM_PIECES + 1 because we also need to hash the en pessant bitboard
 uint64_t TranspositionTable::zobristPositionFlagsKeys[8]; // 8 zobrist keys for every bit in Bitboard::flags
 

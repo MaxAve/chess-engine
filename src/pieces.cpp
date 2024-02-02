@@ -73,7 +73,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
             legalMoves |= ((1ULL << (bit + RIGHT   + UP*2  )) & ~((FILE << 7) | RANK | (RANK << 8)));
             legalMoves |= ((1ULL << (bit + RIGHT*2 + UP    )) & ~((FILE << 6) | (FILE << 7) | RANK));
             legalMoves |= ((1ULL << (bit + RIGHT*2 + DOWN  )) & ~((FILE << 6) | (FILE << 7) | (RANK << 56)));
-            legalMoves &= ~whitePieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~whitePieces;
             // have fun with that
             break;
 
@@ -87,7 +88,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
             legalMoves |= ((1ULL << (bit + RIGHT   + UP*2  )) & ~((FILE << 7) | RANK | (RANK << 8)));
             legalMoves |= ((1ULL << (bit + RIGHT*2 + UP    )) & ~((FILE << 6) | (FILE << 7) | RANK));
             legalMoves |= ((1ULL << (bit + RIGHT*2 + DOWN  )) & ~((FILE << 6) | (FILE << 7) | (RANK << 56)));
-            legalMoves &= ~blackPieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~blackPieces;
             break;
         
         /* White bishop */
@@ -128,7 +130,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~whitePieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~whitePieces;
             break;
 
         /* Black bishop */
@@ -169,7 +172,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~blackPieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~blackPieces;
             break;
 
         /* White rook */
@@ -210,7 +214,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~whitePieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~whitePieces;
             break;
 
         /* Black rook */
@@ -251,7 +256,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~blackPieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~blackPieces;
             break;
 
         /* White queen */
@@ -331,7 +337,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~whitePieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~whitePieces;
             break;
 
         /* Black queen */
@@ -411,7 +418,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
                         break;
                 }
             }
-            legalMoves &= ~blackPieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~blackPieces;
             break;
 
         /* White king */
@@ -428,8 +436,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
 
             if(!(flags & IGNORE_KINGS))
                 legalMoves &= ~GetLegalMovesBlack(bitboard, CAPTURES_ONLY | IGNORE_KINGS);
-
-            legalMoves &= ~whitePieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~whitePieces;
             break;
 
         /* Black king */
@@ -446,8 +454,8 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
 
             if(!(flags & IGNORE_KINGS))
                 legalMoves &= ~GetLegalMovesWhite(bitboard, CAPTURES_ONLY | IGNORE_KINGS);
-
-            legalMoves &= ~blackPieces;
+            if(!(flags & CAPTURES_ONLY))
+                legalMoves &= ~blackPieces;
             break;
     }
 
