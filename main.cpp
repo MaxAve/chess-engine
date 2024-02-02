@@ -137,6 +137,7 @@ int main(int argc, char** argv)
     sf::Vector2i selectedPiecePosition(-1, -1);
     uint8_t selectedPiece = NO_PIECE;
     uint64_t squareMarks = 0ULL;
+    uint64_t legalMoves = 0ULL;
 
     while (window.isOpen())
     {
@@ -160,25 +161,31 @@ int main(int argc, char** argv)
                         {
                             selectedPiecePosition = selectedSquare;
                             selectedPiece = GetPieceType(&mainBoard, bit);
-                            squareMarks = GetLegalMoves(&mainBoard, selectedPiece, bit);
+                            legalMoves = GetLegalMoves(&mainBoard, selectedPiece, bit);
+                            squareMarks = legalMoves;
                         }
                     }
                     else {
                         if(selectedPiecePosition.x != selectedSquare.x || selectedPiecePosition.y != selectedSquare.y)
                         {
-                            // Remove all pieces at the target position
-                            for(uint8_t i = 0; i < 12; i++)
-                                mainBoard.bitboards[i] &= ~(1ULL << bit);
+                            if(legalMoves & (1ULL << bit))
+                            {
+                                // Remove all pieces at the target position
+                                for(uint8_t i = 0; i < 12; i++)
+                                    mainBoard.bitboards[i] &= ~(1ULL << bit);
 
-                            // Place piece at target square
-                            mainBoard.bitboards[selectedPiece] |= (1ULL << bit);
+                                // Place piece at target square
+                                mainBoard.bitboards[selectedPiece] |= (1ULL << bit);
 
-                            // Remove piece from old square
-                            mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
+                                // Remove piece from old square
+                                mainBoard.bitboards[selectedPiece] &= ~(1ULL << (63-GET_1D_X(selectedPiecePosition.x, selectedPiecePosition.y, BOARD_WIDTH)));
+                                
+                                legalMoves = 0ULL;
 
-                            UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
-                            debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
-			            }
+                                UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
+                                debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
+                            }
+                        }
                         selectedPiecePosition = sf::Vector2i(-1, -1);
                     }
                     break;
