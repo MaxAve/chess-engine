@@ -27,6 +27,8 @@ void UpdateBitboard(Bitboard *bitboard, const BitboardModification *modif);
 
 void UpdateBitboard(Bitboard *bitboard, const DeepEval *modif);
 
+BitboardModification PromotePieces(Bitboard *bitboard, uint64_t promotionRank, uint8_t pieceType, uint8_t pieceTypePromoted);
+
 DeepEval minimax(const Bitboard *bitboard, uint8_t depth, bool maximizing, int alpha=INT32_MIN, int beta=INT32_MAX);
 } // namespace Search
 

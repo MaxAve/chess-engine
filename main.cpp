@@ -74,8 +74,15 @@ void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboa
 int main(int argc, char** argv)
 {
     Bitboard mainBoard;
-    InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
+    InitBitboard(&mainBoard, BOARD_SETUP_EMPTY);
     TranspositionTable::InitZobristKeys();
+    mainBoard.bitboards[KB] |= (1ULL << 63);
+    mainBoard.bitboards[KW] |= (1ULL << 50);
+    mainBoard.bitboards[PB] |= (1ULL << 55);
+
+    bool debugMode = false;
+    if(argc > 1)
+        bool debugMode = argv[1];
 
     const int SCREEN_WIDTH = sf::VideoMode::getDesktopMode().width;
     const int SCREEN_HEIGHT = sf::VideoMode::getDesktopMode().height;
@@ -125,6 +132,8 @@ int main(int argc, char** argv)
     InitText(&debug_flags, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 20, "Flags: " + BinaryToString(mainBoard.flags));
     sf::Text debug_eval;
     InitText(&debug_eval, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 40, "Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+    sf::Text debug_deepEval;
+    InitText(&debug_deepEval, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 60, "Deep eval: 0");
 
     /* Square cursor */
     sf::Sprite squareOutline;
@@ -172,7 +181,7 @@ int main(int argc, char** argv)
                     else {
                         if(selectedPiecePosition.x != selectedSquare.x || selectedPiecePosition.y != selectedSquare.y)
                         {
-                            if(legalMoves & (1ULL << bit))
+                            if(legalMoves & (1ULL << bit) || debugMode)
                             {
                                 // Remove all pieces at the target position
                                 for(uint8_t i = 0; i < 12; i++)
@@ -184,12 +193,6 @@ int main(int argc, char** argv)
                                 legalMoves = 0ULL;
 
                                 player1Turn = false;
-
-                                // //TODO computer move; move this to a thread or some shit
-                                // Search::DeepEval cpuEval = Search::minimax(&mainBoard, 4, false);
-                                // for(uint8_t i = 0; i < 12; ++i)
-                                //     mainBoard.bitboards[i] &= ~cpuEval.bestMove.modified;
-                                // mainBoard.bitboards[cpuEval.bestMove.pieceType] = cpuEval.bestMove.modified;
 
                                 UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
                                 debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
@@ -235,22 +238,28 @@ int main(int argc, char** argv)
         window.draw(debug_zobristHash);
         window.draw(debug_flags);
         window.draw(debug_eval);
+        window.draw(debug_deepEval);
 
         window.draw(squareOutline);
 
         window.display();
 
-        if(!player1Turn)
+        if(!player1Turn && !debugMode)
         {
             //TODO computer move; move this to a thread or some shit
             Search::DeepEval cpuEval = Search::minimax(&mainBoard, 4, false);
             for(uint8_t i = 0; i < 12; ++i)
+            {
                 mainBoard.bitboards[i] &= ~cpuEval.bestMove.modified;
+                mainBoard.bitboards[i] &= ~cpuEval.extra.modified;
+            }
             mainBoard.bitboards[cpuEval.bestMove.pieceType] = cpuEval.bestMove.modified;
+            mainBoard.bitboards[cpuEval.extra.pieceType] = cpuEval.extra.modified;
 
             UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
             debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
             debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+            debug_deepEval.setString("Deep eval: " + std::to_string(cpuEval.eval));
 
             player1Turn = true;
         }
