@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     uint8_t result = 0;
 
     bool debugMode = false;
-    bool cpu2 = true; // CPU vs CPU
+    bool cpu2 = false; // CPU vs CPU
 
     const int SCREEN_WIDTH = sf::VideoMode::getDesktopMode().width;
     const int SCREEN_HEIGHT = sf::VideoMode::getDesktopMode().height;
@@ -318,10 +318,12 @@ int main(int argc, char** argv)
             debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
             debug_deepEval.setString("Deep eval: " + std::to_string(cpuEval.eval));
             debug_deepEvalTime.setString("Average eval time: " + std::to_string(thinkTime[0] / thinkTime[1]) + "ms");
+            if(!cpu2)
+                player1Turn = true;
+            else
+                player1Turn = !player1Turn;
             CheckGameOver(&mainBoard, &result);
         }
-
-        player1Turn = !player1Turn;
     }
 
     return 0;
