@@ -27,6 +27,10 @@
 
 sf::Font openSans;
 
+bool debugMode = false;
+bool cpu2 = true; // CPU vs CPU
+uint8_t result = 0;
+
 void InitText(sf::Text *text, int x, int y, std::string str)
 {
     (*text).setFont(openSans);
@@ -74,15 +78,19 @@ void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboa
 
 void CheckGameOver(const Bitboard *bitboard, uint8_t *statusUpdate)
 {
-    if(Eval::IsWhiteCheckmated(bitboard))
+    if(!debugMode)
     {
-        *statusUpdate = 2;
-    }
-    else if(Eval::IsBlackCheckmated(bitboard)) {
-        *statusUpdate = 1;
-    }
-    else if(Eval::IsDraw(bitboard)) {
-        *statusUpdate = 3;
+        if(Eval::IsWhiteCheckmated(bitboard))
+        {
+            *statusUpdate = 2;
+        }
+        else if(Eval::IsBlackCheckmated(bitboard)) {
+            *statusUpdate = 1;
+        }
+        else if(Eval::IsDraw(bitboard)) {
+            *statusUpdate = 3;
+        }
+        //std::cout << (int)result << "\n";
     }
 }
 
@@ -96,10 +104,6 @@ int main(int argc, char** argv)
 
     uint64_t legalMoves = 0ULL;
     bool player1Turn = true;
-    uint8_t result = 0;
-
-    bool debugMode = false;
-    bool cpu2 = true; // CPU vs CPU
 
     const int SCREEN_WIDTH = sf::VideoMode::getDesktopMode().width;
     const int SCREEN_HEIGHT = sf::VideoMode::getDesktopMode().height;
@@ -169,9 +173,10 @@ int main(int argc, char** argv)
     uint8_t selectedPiece = NO_PIECE;
     uint64_t squareMarks = 0ULL;
 
+    sf::Event event;
+
     while (window.isOpen())
     {
-        sf::Event event;
         while (window.pollEvent(event))
         {
             switch(event.type)

@@ -2,6 +2,7 @@
 #define PIECES_H
 
 #include <stdint.h>
+#include <cmath>
 #include "bitboard.h"
 
 #define CAPTURES_ONLY 0b00000001

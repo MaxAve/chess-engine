@@ -50,3 +50,8 @@ uint8_t GetPieceType(Bitboard *bitboard, uint8_t bit)
             return i;
     return NO_PIECE;
 }
+
+void PutPiece(Bitboard *bitboard, uint8_t piece, uint8_t x, uint8_t y)
+{
+    bitboard->bitboards[piece] |= (1ULL << (63 - (x + y * BOARD_WIDTH)));
+}

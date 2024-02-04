@@ -61,5 +61,6 @@ uint64_t GetCombinedBitboard(const Bitboard *bitboard);
 uint64_t GetCombinedBitboardWhite(const Bitboard *bitboard);
 uint64_t GetCombinedBitboardBlack(const Bitboard *bitboard);
 uint8_t GetPieceType(Bitboard *bitboard, uint8_t bit);
+void PutPiece(Bitboard *bitboard, uint8_t piece, uint8_t x, uint8_t y);
 
 #endif
