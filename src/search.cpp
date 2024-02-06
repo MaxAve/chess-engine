@@ -1,26 +1,26 @@
 #include "search.h"
 
-void Search::UpdateBitboard(Bitboard *bitboard, const Search::BitboardModification *modif)
+void Search::UpdateBitboard(Bitboard &bitboard, const Search::BitboardModification &modif)
 {
-    bitboard->bitboards[modif->pieceType] = modif->modified;
+    bitboard.bitboards[modif.pieceType] = modif.modified;
 }
 
-void Search::UpdateBitboard(Bitboard *bitboard, const Search::DeepEval *modif)
+void Search::UpdateBitboard(Bitboard &bitboard, const Search::DeepEval &modif)
 {
-    bitboard->bitboards[modif->bestMove.pieceType] = modif->bestMove.modified;
-    bitboard->bitboards[modif->extra.pieceType] = modif->extra.modified;
+    bitboard.bitboards[modif.bestMove.pieceType] = modif.bestMove.modified;
+    bitboard.bitboards[modif.extra.pieceType] = modif.extra.modified;
 }
 
-Search::BitboardModification Search::PromotePieces(Bitboard *bitboard, uint64_t promotionRank, uint8_t pieceType, uint8_t pieceTypePromoted)
+Search::BitboardModification Search::PromotePieces(Bitboard &bitboard, uint64_t promotionRank, uint8_t pieceType, uint8_t pieceTypePromoted)
 {
-    const uint64_t promotion = bitboard->bitboards[pieceType] & promotionRank;
-    bitboard->bitboards[pieceType] &= ~promotion;
-    bitboard->bitboards[pieceTypePromoted] |= promotion;
-    const Search::BitboardModification ret = {pieceTypePromoted, bitboard->bitboards[pieceTypePromoted]};
+    const uint64_t promotion = bitboard.bitboards[pieceType] & promotionRank;
+    bitboard.bitboards[pieceType] &= ~promotion;
+    bitboard.bitboards[pieceTypePromoted] |= promotion;
+    const Search::BitboardModification ret = {pieceTypePromoted, bitboard.bitboards[pieceTypePromoted]};
     return ret;
 }
 
-Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool maximizing, int alpha, int beta)
+Search::DeepEval Search::minimax(const Bitboard &bitboard, uint8_t depth, bool maximizing, int alpha, int beta)
 {
     Search::DeepEval eval;
 
@@ -53,13 +53,13 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
         const uint64_t enemyBoard = GetCombinedBitboardBlack(bitboard);
         for(uint8_t i = 6; i < 12; ++i)
         {
-            if(bitboard->bitboards[i] > 0ULL)
+            if(bitboard.bitboards[i] > 0ULL)
             {
                 // Iterate over every bit in the bitboard
                 for(uint8_t j = 0; j < 64; ++j)
                 {
                     // Check if there is a piece on that square
-                    if(bitboard->bitboards[i] & (1ULL << j))
+                    if(bitboard.bitboards[i] & (1ULL << j))
                     {
                         const uint64_t legalMoves = GetLegalMoves(bitboard, i, j);
                         uint64_t orderedMoves[] = {
@@ -67,7 +67,8 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                             legalMoves ^ orderedMoves[0]
                         };
 
-                        if(i != KW && bitboard->bitboards[KW] & enemyMoves)
+                        // Reject all passive moves that don't block checks if the king is in check
+                        if(i != KW && (bitboard.bitboards[KW] & enemyMoves))
                             orderedMoves[1] &= enemyMoves;
 
                         // Iterate over every move, in order from most to least aggressive
@@ -79,7 +80,7 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                                 {
                                     if(orderedMoves[moveOrder] & (1ULL << k))
                                     {
-                                        Bitboard hypotheticalBitboard = *bitboard;
+                                        Bitboard hypotheticalBitboard = bitboard;
 
                                         // Capture pieces at target square
                                         for(int l = 0; l < 12; ++l)
@@ -87,9 +88,9 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                                         hypotheticalBitboard.bitboards[i] &= ~(1ULL << j); // Remove piece from old position
                                         hypotheticalBitboard.bitboards[i] |= (1ULL << k); // Place piece at target position
                                         // TODO only promotes to queens, add other pieces
-                                        const Search::BitboardModification promotion = Search::PromotePieces(&hypotheticalBitboard, RANK_8, PW, QW); // Handle promotions
+                                        const Search::BitboardModification promotion = Search::PromotePieces(hypotheticalBitboard, RANK_8, PW, QW); // Handle promotions
 
-                                        Search::DeepEval hypotheticalEval = minimax(&hypotheticalBitboard, depth-1, false, alpha, beta);
+                                        Search::DeepEval hypotheticalEval = minimax(hypotheticalBitboard, depth-1, false, alpha, beta);
 
                                         if(hypotheticalEval.eval > eval.eval)
                                         {
@@ -122,13 +123,13 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
         const uint64_t enemyBoard = GetCombinedBitboardWhite(bitboard);
         for(uint8_t i = 0; i < 6; ++i)
         {
-            if(bitboard->bitboards[i] > 0ULL)
+            if(bitboard.bitboards[i] > 0ULL)
             {
                 // Iterate over every bit in the bitboard
                 for(uint8_t j = 0; j < 64; ++j)
                 {
                     // Check if there is a piece on that square
-                    if(bitboard->bitboards[i] & (1ULL << j))
+                    if(bitboard.bitboards[i] & (1ULL << j))
                     {
                         const uint64_t legalMoves = GetLegalMoves(bitboard, i, j); // Get legal moves
                         uint64_t orderedMoves[] = {
@@ -136,7 +137,8 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                             legalMoves ^ orderedMoves[0]
                         };
 
-                        if(i != KB && bitboard->bitboards[KB] & enemyMoves)
+                        // Reject all passive moves that don't block checks if the king is in check
+                        if(i != KB && (bitboard.bitboards[KB] & enemyMoves))
                             orderedMoves[1] &= enemyMoves;
 
                         // Iterate over every move from most to least aggressive
@@ -148,7 +150,7 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                                 {
                                     if(orderedMoves[moveOrder] & (1ULL << k))
                                     {
-                                        Bitboard hypotheticalBitboard = *bitboard;
+                                        Bitboard hypotheticalBitboard = bitboard;
 
                                         // Capture pieces at target square
                                         for(int l = 0; l < 12; ++l)
@@ -156,9 +158,9 @@ Search::DeepEval Search::minimax(const Bitboard *bitboard, uint8_t depth, bool m
                                         hypotheticalBitboard.bitboards[i] &= ~(1ULL << j); // Remove piece from old position
                                         hypotheticalBitboard.bitboards[i] |= (1ULL << k); // Place piece at target position
                                         // TODO only promotes to queens, add other pieces
-                                        const Search::BitboardModification promotion = Search::PromotePieces(&hypotheticalBitboard, RANK_1, PB, QB); // Handle promotions
+                                        const Search::BitboardModification promotion = Search::PromotePieces(hypotheticalBitboard, RANK_1, PB, QB); // Handle promotions
 
-                                        Search::DeepEval hypotheticalEval = minimax(&hypotheticalBitboard, depth-1, true, alpha, beta);
+                                        Search::DeepEval hypotheticalEval = minimax(hypotheticalBitboard, depth-1, true, alpha, beta);
 
                                         if(hypotheticalEval.eval < eval.eval)
                                         {

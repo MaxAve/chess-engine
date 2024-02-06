@@ -76,23 +76,23 @@ const int pieceSquareTables[6][64]
 /**
  * Returns an evaluation by using piece square tables
 */
-int PieceSquareTablesEval(const Bitboard *bitboard);
+int PieceSquareTablesEval(const Bitboard &bitboard);
 
 /**
  * Returns true if white is checkmated
 */
-bool IsWhiteCheckmated(const Bitboard *bitboard);
+bool IsWhiteCheckmated(const Bitboard &bitboard);
 
 /**
  * Returns true if black is checkmated
 */
-bool IsBlackCheckmated(const Bitboard *bitboard);
+bool IsBlackCheckmated(const Bitboard &bitboard);
 
 /**
  * Returns true if the position is a guaranteed draw
  * @warning Stalemate is checked by seeing whether the king can move or not; THIS DOES NOT include checking if the king is in check
 */
-bool IsDraw(const Bitboard *bitboard);
+bool IsDraw(const Bitboard &bitboard);
 }
 
 #endif

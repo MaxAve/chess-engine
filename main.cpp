@@ -76,19 +76,19 @@ void UpdatePieceSprites(sf::Sprite *sprites, sf::Texture *textures, const Bitboa
     }
 }
 
-void CheckGameOver(const Bitboard *bitboard, uint8_t *statusUpdate)
+void CheckGameOver(const Bitboard &bitboard, uint8_t &statusUpdate)
 {
     if(!debugMode)
     {
         if(Eval::IsWhiteCheckmated(bitboard))
         {
-            *statusUpdate = 2;
+            statusUpdate = 2;
         }
         else if(Eval::IsBlackCheckmated(bitboard)) {
-            *statusUpdate = 1;
+            statusUpdate = 1;
         }
         else if(Eval::IsDraw(bitboard)) {
-            *statusUpdate = 3;
+            statusUpdate = 3;
         }
         //std::cout << (int)result << "\n";
     }
@@ -97,7 +97,7 @@ void CheckGameOver(const Bitboard *bitboard, uint8_t *statusUpdate)
 int main(int argc, char** argv)
 {
     Bitboard mainBoard;
-    InitBitboard(&mainBoard, BOARD_SETUP_CLASSIC);
+    InitBitboard(mainBoard, BOARD_SETUP_CLASSIC);
     TranspositionTable::InitZobristKeys();
 
     uint64_t thinkTime[2];
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     sf::Text debug_flags;
     InitText(&debug_flags, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 30, "Flags: " + BinaryToString(mainBoard.flags));
     sf::Text debug_eval;
-    InitText(&debug_eval, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 60, "Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+    InitText(&debug_eval, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 60, "Eval: " + std::to_string(Eval::PieceSquareTablesEval(mainBoard)));
     sf::Text debug_deepEval;
     InitText(&debug_deepEval, SQUARE_SIZE * 8 + chessboardRenderOffset.x + 20, chessboardRenderOffset.y + 90, "Deep eval: 0");
     sf::Text debug_deepEvalTime;
@@ -194,11 +194,11 @@ int main(int argc, char** argv)
                         if (selectedPiecePosition.x < 0 || selectedPiecePosition.y < 0)
                         {
                             // If there is a piece on this square, set the selected piece
-                            if (GetPieceType(&mainBoard, bit) != NO_PIECE)
+                            if (GetPieceType(mainBoard, bit) != NO_PIECE)
                             {
                                 selectedPiecePosition = selectedSquare;
-                                selectedPiece = GetPieceType(&mainBoard, bit);
-                                legalMoves = GetLegalMoves(&mainBoard, selectedPiece, bit);
+                                selectedPiece = GetPieceType(mainBoard, bit);
+                                legalMoves = GetLegalMoves(mainBoard, selectedPiece, bit);
                                 squareMarks = legalMoves;
                             }
                         }
@@ -216,11 +216,11 @@ int main(int argc, char** argv)
                                     
                                     legalMoves = 0ULL;
                                     player1Turn = false;
-                                    CheckGameOver(&mainBoard, &result);
+                                    CheckGameOver(mainBoard, result);
 
                                     UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
                                     debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
-                                    debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+                                    debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(mainBoard)));
                                 }
                             }
                             selectedPiecePosition = sf::Vector2i(-1, -1);
@@ -275,7 +275,7 @@ int main(int argc, char** argv)
             //TODO computer move; move this to a thread or some shit
             auto start = std::chrono::high_resolution_clock::now();
 
-            Search::DeepEval cpuEval = Search::minimax(&mainBoard, 4, true);
+            Search::DeepEval cpuEval = Search::minimax(mainBoard, 4, true);
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
@@ -292,10 +292,10 @@ int main(int argc, char** argv)
 
             UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
             debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
-            debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+            debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(mainBoard)));
             debug_deepEval.setString("Deep eval: " + std::to_string(cpuEval.eval));
             debug_deepEvalTime.setString("Average eval time: " + std::to_string(thinkTime[0] / thinkTime[1]) + "ms");
-            CheckGameOver(&mainBoard, &result);
+            CheckGameOver(mainBoard, result);
         }
 
         if(!player1Turn && !debugMode && result == 0)
@@ -303,7 +303,7 @@ int main(int argc, char** argv)
             //TODO computer move; move this to a thread or some shit
             auto start = std::chrono::high_resolution_clock::now();
 
-            Search::DeepEval cpuEval = Search::minimax(&mainBoard, 4, false);
+            Search::DeepEval cpuEval = Search::minimax(mainBoard, 4, false);
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
@@ -320,12 +320,12 @@ int main(int argc, char** argv)
 
             UpdatePieceSprites(chessPieceSprites, pieceTextures, mainBoard);
             debug_zobristHash.setString("Hash: " + std::to_string(TranspositionTable::ZobristHash(mainBoard)));
-            debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(&mainBoard)));
+            debug_eval.setString("Eval: " + std::to_string(Eval::PieceSquareTablesEval(mainBoard)));
             debug_deepEval.setString("Deep eval: " + std::to_string(cpuEval.eval));
             debug_deepEvalTime.setString("Average eval time: " + std::to_string(thinkTime[0] / thinkTime[1]) + "ms");
             if(!cpu2)
                 player1Turn = true;
-            CheckGameOver(&mainBoard, &result);
+            CheckGameOver(mainBoard, result);
         }
         if(cpu2)
             player1Turn = !player1Turn;

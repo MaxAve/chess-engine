@@ -1,26 +1,26 @@
 #include "pieces.h"
 
-uint64_t GetLegalMovesWhite(const Bitboard *bitboard, uint8_t flags)
+uint64_t GetLegalMovesWhite(const Bitboard &bitboard, uint8_t flags)
 {
     uint64_t bb = 0ULL;
     for(uint8_t i = 6; i < 12; ++i)
         for(uint8_t j = 0; j < 64; ++j)
-            if(bitboard->bitboards[i] & (1ULL << j))
+            if(bitboard.bitboards[i] & (1ULL << j))
                 bb |= GetLegalMoves(bitboard, i, j, flags);
     return bb;
 }
 
-uint64_t GetLegalMovesBlack(const Bitboard *bitboard, uint8_t flags)
+uint64_t GetLegalMovesBlack(const Bitboard &bitboard, uint8_t flags)
 {
     uint64_t bb = 0ULL;
     for(uint8_t i = 0; i < 6; ++i)
         for(uint8_t j = 0; j < 64; ++j)
-            if(bitboard->bitboards[i] & (1ULL << j))
+            if(bitboard.bitboards[i] & (1ULL << j))
                 bb |= GetLegalMoves(bitboard, i, j, flags);
     return bb;
 }
 
-uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit, uint8_t flags)
+uint64_t GetLegalMoves(const Bitboard &bitboard, uint8_t pieceType, uint8_t bit, uint8_t flags)
 {
     const uint64_t whitePieces = GetCombinedBitboardWhite(bitboard);
     const uint64_t blackPieces = GetCombinedBitboardBlack(bitboard);
@@ -263,7 +263,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
         /* White queen */
         case QW:
             if(flags & IGNORE_KINGS)
-                allPieces ^= bitboard->bitboards[KB];
+                allPieces ^= bitboard.bitboards[KB];
 
             if(bit % 8 != 0 && bit / 8 < 7)
             {
@@ -344,7 +344,7 @@ uint64_t GetLegalMoves(const Bitboard *bitboard, uint8_t pieceType, uint8_t bit,
         /* Black queen */
         case QB:
             if(flags & IGNORE_KINGS)
-                allPieces ^= bitboard->bitboards[KW];
+                allPieces ^= bitboard.bitboards[KW];
 
             if(bit % 8 != 0 && bit / 8 < 7)
             {
